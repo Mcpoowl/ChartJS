@@ -145,6 +145,14 @@
                 <attributeType name="Decimal"/>
             </attributeTypes>
         </property>
+        <property key="isToday" type="attribute" entityProperty="datapointentity" allowNonPersistableEntities="true" required="false">
+            <caption>Today point attribute</caption>
+            <category>Data Point</category>
+            <description> True if the Today Line should be drawn here, if any.</description>
+            <attributeTypes>
+                <attributeType name="Boolean"/>
+            </attributeTypes>
+        </property>
         <!-- Behavior -->
         <property key="onclickmf" type="microflow" required="false">
             <caption>On Click Microflow</caption>
@@ -278,6 +286,21 @@
             <caption>Scale line color</caption>
             <category>Settings Line Chart</category>
             <description>The scale line color.</description>
+        </property>
+        <property key="todayLine" type="boolean" required="true" defaultValue="false">
+            <caption>Today line</caption>
+            <category>Settings Line Chart</category>
+            <description>Draw a vertical line at the 'todaypoint (the index of the current day of the month. Example: If today is the 6th, the today point will be on the 6th'</description>
+        </property>
+        <property key="todayLineColor" type="string" required="false" defaultValue="#ff0000">
+            <caption>Today line color</caption>
+            <category>Settings Line Chart</category>
+            <description> The color which the Today Line should have</description>
+        </property>
+        <property key="todayLabel" type="string" required="false" defaultValue="Vandaag">
+            <caption>Today label</caption>
+            <category>Settings Line Chart</category>
+            <description>The label which the today line should have</description>
         </property>
     </properties>
 </widget>

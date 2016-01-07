@@ -2790,7 +2790,6 @@ define([], function() {
 
                             this.scale.draw(easingDecimal);
 
-
                             helpers.each(this.datasets,function(dataset){
                                 var pointsWithValues = helpers.where(dataset.points, hasValue);
 
@@ -2944,6 +2943,30 @@ define([], function() {
                         legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<segments.length; i++){%><li><span style=\"background-color:<%=segments[i].fillColor%>\"></span><%if(segments[i].label){%><%=segments[i].label%><%}%></li><%}%></ul>"
                     };
 
+                    Chart.types.Line.extend({
+                        name: "LineWithLine",
+                        draw: function () {
+                            Chart.types.Line.prototype.draw.apply(this, arguments);
+
+                            helpers.each(this.datasets,function(dataset){
+                            
+                            var point = dataset.points[this.options.lineAtIndex]
+                            var scale = this.scale
+
+                            // draw line
+                            this.chart.ctx.beginPath();
+                            this.chart.ctx.moveTo(point.x, scale.startPoint);
+                            this.chart.ctx.strokeStyle = this.options.strokeStyle;
+                            this.chart.ctx.lineTo(point.x, scale.endPoint);
+                            this.chart.ctx.stroke();
+                            
+                            // write TODAY
+
+                            this.chart.ctx.textAlign = 'center';
+                            this.chart.ctx.fillText(this.options.todayLabel, point.x, scale.startPoint - 5);
+                            }, this);
+                        }
+                    });
 
                     Chart.Type.extend({
                         //Passing in a name registers this chart in the Chart namespace
