@@ -8,6 +8,7 @@ define([
 ], function (declare, lang, domQuery, on, _core) {
     "use strict";
     var labelPoint = null;
+    var todayValueSeen = null;
 
     // Declare widget.
     return declare("ChartJS.widgets.LineChart.widget.LineChart", [ _core ], {
@@ -42,7 +43,7 @@ define([
                     maxpoints = set.points.length;
                 }
             }
-
+            var match = false;
             for (j = 0; j < sets.length; j++) {
                 set = sets[j];
 
@@ -66,10 +67,20 @@ define([
                     }
 
                     points.push(+(set.points[i].get(this.seriesylabel))); // Convert to integer, so the stackedbar doesnt break!
+
                     if (set.points[i].get(this.isToday) === true){
                         //Get the index of the today value
                         labelPoint = set.points.indexOf(set.points[i]);
-                    }
+                        if(labelPoint != -1) {
+                        match = true;
+                        console.log("Index for todayLine found. Drawing todayLine. Index: " + labelPoint);
+                        this.todayLine = true;                          
+                        } else {
+                            console.log("Invalid index found: " + labelPoint);
+                        }
+
+                    } 
+                    
                 }
 
                 if (!xlabelsSet) {
@@ -92,7 +103,15 @@ define([
                     active : true
                 });
             }
+
+
             this._chartData.labels = xlabels;
+            if (match === false && this.todayLine === true) {
+                console.log("No match found to use todayLine on, disabling todayLine")
+                this.todayLine = false;
+            }
+
+
 
             console.log("Created LineChart data");
             console.log(this._chartData);
