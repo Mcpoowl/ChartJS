@@ -59,9 +59,11 @@ define([
         _currentContext: null,
         _addedToBody: false,
 
+        _tooltipNode: null,
+
         startup: function () {
             // Uncomment line to start debugging
-            //logger.level(logger.DEBUG); 
+            //logger.level(logger.DEBUG);
             logger.debug(this.id + ".startup");
 
             var domNode = null;
@@ -69,12 +71,19 @@ define([
             // Activate chartJS.
             this._chartJS = _charts.noConflict();
 
+            console.log(this._chartJS);
+
             // Fonts
             this._font = this.labelFont || "Helvetica Neue";
 
             // Hack to fix the tooltip event, also added "mouseover"
             this._chartJS.defaults.global.tooltipEvents = ["mouseover", "mouseup", "mousedown", "mousemove", "touchstart", "touchmove", "mouseout"];
             this._chartJS.defaults.global.tooltipXOffset = 0;
+
+            if (!this.chartAnimation) {
+                this._chartJS.defaults.global.animation.duration = 0;
+            }
+
 
             // Set object , dataset and datapoint.
             this._dataset = this.datasetentity.split("/")[0];
@@ -91,15 +100,14 @@ define([
 
             this._activeDatasets = [];
 
-            if (!dojoDom.byId("chartjsTooltip")) {
-                domNode = domConstruct.toDom(_chartJSTooltipTemplate);
-                domConstruct.place(domNode, win.body());
-            }
+            // if (!dojoDom.byId("chartjsTooltip")) {
+            //     this._tooltipNode = domConstruct.toDom(_chartJSTooltipTemplate);
+            //     domConstruct.place(this._tooltipNode, win.body());
+            // }
 
             this.connect(this.mxform, "resize", lang.hitch(this, function () {
                 this._resize();
             }));
-
         },
 
         datasetAdd: function (dataset, datapoints) {
@@ -130,14 +138,18 @@ define([
             if (this._handle !== null) {
                 mx.data.unsubscribe(this._handle);
             }
-            this._handle = mx.data.subscribe({
-                guid: this._mxObj.getGuid(),
-                callback: lang.hitch(this, this._loadData)
-            });
+            if(this._mxObj) {
+                this._handle = mx.data.subscribe({
+                    guid: this._mxObj.getGuid(),
+                    callback: lang.hitch(this, this._loadData)
+                });
 
-            // Load data again.
-            this._loadData();
-
+                // Load data again.
+                this._loadData();
+                domStyle.set(this.domNode, "display", "");
+            } else {
+                domStyle.set(this.domNode, "display", "none");
+            }
             if (typeof callback !== "undefined") {
                 callback();
             }
@@ -154,14 +166,20 @@ define([
                 var obj = objs[0], // Chart object is always only one.
                     j = null,
                     dataset = null,
-                    pointguids = null;
+                    pointguids = null,
+                    guids = obj.get(this._dataset);
 
                 this._data.object = obj;
                 this._data.datasets = [];
 
+                if (!guids) {
+                    logger.warn(this.id + "._loadData failed, no _dataset. Not rendering Chart");
+                    return;
+                }
+
                 // Retrieve datasets
                 mx.data.get({
-                    guids: obj.get(this._dataset),
+                    guids: guids,
                     callback: lang.hitch(this, function (datasets) {
                         var set = {};
 
@@ -194,6 +212,10 @@ define([
             logger.debug(this.id + ".uninitialize");
             if (this._handle !== null) {
                 mx.data.unsubscribe(this._handle);
+            }
+
+            if (this._tooltipNode) {
+                domConstruct.destroy(this._tooltipNode);
             }
         },
 

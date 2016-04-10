@@ -15,6 +15,7 @@ define([
 
         _processData : function () {
             logger.debug(this.id + "._processData");
+
             var sets = [],
                 points = null,
                 set = {
@@ -50,7 +51,8 @@ define([
                     for (k = 0; k < maxpoints; k++) {
                         points.push(0);
                     }
-                    logger.debug(this.id + " - empty dataset");
+                    logger.warn(this.id + " - empty dataset");
+                    continue;
                 }
 
                 set.points = this._sortArrayMx(set.points, this.sortingxvalue);
@@ -77,7 +79,6 @@ define([
                 } catch (e) {
                     _bezier = 0.4;
                 }
-
 
                 _set = {
                     label : (this.scaleShowLabelsBottom === true) ? label : "",
@@ -110,9 +111,7 @@ define([
         },
 
         _createChart : function (data) {
-
             logger.debug(this.id + "._createChart");
-
 
             if (this._chart) {
                 this._chart.stop();
@@ -122,6 +121,7 @@ define([
                 this._chart.bindEvents(); // tooltips otherwise won't work
             } else {
                 logger.debug("stacked:" + this.isStacked);
+
                 this._chart = new this._chartJS(this._ctx, {
                     type: "line",
                     data: data,
@@ -141,14 +141,17 @@ define([
                                     labelString: (this.yLabel !== "") ? this.yLabel : "",
                                     fontFamily: this._font
                                 },
-                                ticks : { fontFamily: this._font,
-                                callback: lang.hitch(this, function(value){
-                                        var round = parseInt(this.roundY);
-                                        if (!isNaN(round) && round >= 0) {
-                                            return Number(value).toFixed(round);
-                                        }
-                                        return value;
-                                    }) }
+                                ticks : {
+                                    fontFamily: this._font,
+                                    beginAtZero: this.scaleBeginAtZero,
+                                    callback: lang.hitch(this, function(value){
+                                            var round = parseInt(this.roundY);
+                                            if (!isNaN(round) && round >= 0) {
+                                                return Number(value).toFixed(round);
+                                            }
+                                            return value;
+                                        })
+                                }
                             }],
                             xAxes: [{
                                 scaleLabel: {
@@ -171,15 +174,15 @@ define([
                             labels : { fontFamily : this._font }
                         },
                         elements: {
-
                             point: {
-                                radius : this.pointRadius,
-                                borderWidth : this.pointBorderWidth,
+                                radius : this.pointDot ? this.pointRadius : 0,
+                                borderWidth : this.pointDot ? this.pointBorderWidth : 0,
                                 hitRadius : this.pointHitRadius,
                                 hoverRadius : this.pointHoverRadius,
                                 hoverBorderWidth : this.pointHoverBorderWidth
                             }
                         },
+
                         //Boolean - Whether to show labels on the scale
                         scaleShowLabels : this.scaleShowLabels,
 
@@ -229,7 +232,6 @@ define([
 
                     }
                 });
-
 
                 this.connect(window, "resize", lang.hitch(this, function () {
                     this._resize();
