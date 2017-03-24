@@ -1,17 +1,15 @@
-/*jslint white:true, nomen: true, plusplus: true */
-/*global mx, mendix, require, console, define, module, logger, window */
-/*mendix */
 define([
-
-    "dojo/_base/declare", "dojo/_base/lang", "dojo/query", "dojo/on", "ChartJS/widgets/Core"
-
-], function (declare, lang, domQuery, on, _core) {
+    "dojo/_base/declare",
+    "ChartJS/widgets/Core",
+    "dojo/_base/lang",
+    "dojo/query",
+    "dojo/on"
+], function (declare, Core, lang, domQuery, on) {
     "use strict";
 
-    // Declare widget.
-    return declare("ChartJS.widgets.RadarChart.widget.RadarChart", [ _core ], {
+    return declare("ChartJS.widgets.RadarChart.widget.RadarChart", [ Core ], {
 
-        // Overwrite functions from _core here...
+        _chartType: "radar",
 
         _processData : function () {
             logger.debug(this.id + "._processData");
@@ -109,25 +107,9 @@ define([
             } else {
 
                 this._chart = new this._chartJS(this._ctx, {
-                    type: "radar",
+                    type: this._chartType,
                     data: data,
-                    options: {
-                        title: {
-                            display: (this.chartTitle !== "") ? true : false,
-                            text: (this.chartTitle !== "") ? this.chartTitle : "",
-                            fontFamily: this._font,
-                            fontSize: this.titleSize
-                        },
-
-                        responsive : this.responsive,
-                        responsiveAnimationDuration : (this.responsiveAnimationDuration > 0 ? this.responsiveAnimationDuration : 0),
-                        tooltips : {
-                            enabled : this.showTooltips
-                        },
-                        legend: {
-                            display: this.showLegend,
-                            labels : { fontFamily : this._font }
-                        },
+                    options: this._chartOptions({
 
                         scale: {
                             ticks: {
@@ -188,30 +170,19 @@ define([
                         //Boolean - Whether to fill the dataset with a colour
                         datasetFill : this.datasetFill,
 
-                        legendCallback : this._legendCallback,
-
-                        // Show tooltips at all
-                        showTooltips : this.showTooltips,
-
-                        // maintainAspectRatio
-                        maintainAspectRatio : this.maintainAspectRatio,
-
-                        // Custom tooltip?
-                        customTooltips : false //lang.hitch(this, this.customTooltip)
-
-                    }
+                        legendCallback : this._legendCallback
+                    })
                 });
 
                 // Add class to determain chart type
                 this._addChartClass("chartjs-radar-chart");
 
-                if (this.onclickmf) {
-                    on(this._chart.chart.canvas, "click", lang.hitch(this, this._onClickChart));
-                }
+                on(this._chart.chart.canvas, "click", lang.hitch(this, this._onClickChart));
             }
         }
     });
 });
+
 require(["ChartJS/widgets/RadarChart/widget/RadarChart"], function () {
     "use strict";
 });
